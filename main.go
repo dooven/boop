@@ -27,6 +27,11 @@ type regionOption struct {
 	Region string
 }
 
+type config struct {
+	regions []regionOption
+	users []string
+}
+
 func init() {
 	regionTemplates = &promptui.SelectTemplates{
 		Label:    "{{ . }}?",
