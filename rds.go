@@ -32,7 +32,7 @@ func (r *rdsClient) getData(tempPath string) ([]*rds.DBInstance, error) {
 		}
 
 		if err := os.Mkdir(path.Dir(tempPath), os.ModePerm); err != nil {
-
+			return nil, err
 		}
 
 		jsonFile, err := os.Create(tempPath)
@@ -50,6 +50,7 @@ func (r *rdsClient) getData(tempPath string) ([]*rds.DBInstance, error) {
 	}
 
 	content, err := ioutil.ReadFile(tempPath)
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -72,6 +73,7 @@ func (r *rdsClient) generateToken(endpoint string, dbUser string) (string, error
 		*config.Region,
 		dbUser,
 		config.Credentials); err == nil {
+
 		if err := clipboard.WriteAll(authToken); err != nil {
 			return "", err
 		}
