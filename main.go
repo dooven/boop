@@ -18,11 +18,29 @@ import (
 
 var (
 	PORT = "3006"
+	regionTemplates *promptui.SelectTemplates
+	addressTemplates *promptui.SelectTemplates
 )
 
 type regionOption struct {
 	Name   string
 	Region string
+}
+
+func init() {
+	regionTemplates = &promptui.SelectTemplates{
+		Label:    "{{ . }}?",
+		Active:   "- {{ .Name | cyan }} ({{ .Region | red }})",
+		Inactive: "  {{ .Name | cyan }} ({{ .Region | red }})",
+		Selected: "* {{ .Name | red | cyan }}",
+	}
+
+	addressTemplates = &promptui.SelectTemplates{
+		Label:    "{{ . }}?",
+		Active:   "- {{ . | cyan }}",
+		Inactive: "  {{ . | cyan }}",
+		Selected: "* {{ . | red | cyan }}",
+	}
 }
 
 func main() {
@@ -31,12 +49,6 @@ func main() {
 		{Name: "test-region", Region: endpoints.EuWest1RegionID},
 	}
 
-	regionTemplates := &promptui.SelectTemplates{
-		Label:    "{{ . }}?",
-		Active:   "- {{ .Name | cyan }} ({{ .Region | red }})",
-		Inactive: "  {{ .Name | cyan }} ({{ .Region | red }})",
-		Selected: "* {{ .Name | red | cyan }}",
-	}
 
 	regionSearcher := func(input string, index int) bool {
 		region := regionOptions[index]
@@ -97,13 +109,6 @@ func main() {
 	for _, dbInstance := range instances {
 		address := dbInstance.Endpoint.Address
 		dbInstanceAddress = append(dbInstanceAddress, *address)
-	}
-
-	addressTemplates := &promptui.SelectTemplates{
-		Label:    "{{ . }}?",
-		Active:   "- {{ . | cyan }}",
-		Inactive: "  {{ . | cyan }}",
-		Selected: "* {{ . | red | cyan }}",
 	}
 
 	addressSearcher := func(input string, index int) bool {
