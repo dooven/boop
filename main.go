@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/atotto/clipboard"
 	"log"
 	"os"
 	"path"
@@ -128,9 +129,15 @@ func main() {
 
 	endpoint := fmt.Sprintf("%s:%s/", dbInstanceAddress[selectAddressIndex], PORT)
 
-	if authToken, err := rdsClient.generateToken(endpoint, "test-user"); err == nil {
-		log.Println(authToken)
-	} else {
+	authToken, err := rdsClient.generateToken(endpoint, "test-user")
+
+	if err != nil {
 		log.Fatal(err)
 	}
+
+	if err := clipboard.WriteAll(authToken); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println(authToken)
 }

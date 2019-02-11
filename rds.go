@@ -7,7 +7,6 @@ import (
 	"os"
 	"path"
 
-	"github.com/atotto/clipboard"
 	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/aws/aws-sdk-go/service/rds/rdsutils"
 )
@@ -73,11 +72,6 @@ func (r *rdsClient) generateToken(endpoint string, dbUser string) (string, error
 		*config.Region,
 		dbUser,
 		config.Credentials); err == nil {
-
-		if err := clipboard.WriteAll(authToken); err != nil {
-			return "", err
-		}
-
 		return authToken, nil
 	} else {
 		return "", err
