@@ -65,7 +65,7 @@ func main() {
 
 	tempPath := path.Join(
 		os.TempDir(),
-		"generate-db-auth",
+		"boop-cache",
 		fmt.Sprintf("%s.json", selectedRegion),
 	)
 
