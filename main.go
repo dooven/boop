@@ -83,11 +83,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	rdsHelper := newRdsClient(rds.New(sess))
+	rdsClient := newRdsClient(rds.New(sess))
 
 	var dbInstanceAddress []string
 
-	instances, err := rdsHelper.getData(tempPath)
+	instances, err := rdsClient.getData(tempPath)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for _, dbInstance := range instances {
 		address := dbInstance.Endpoint.Address
@@ -120,12 +124,11 @@ func main() {
 
 	if selectAddressErr != nil {
 		log.Fatal(selectAddressErr)
-		return
 	}
 
 	endpoint := fmt.Sprintf("%s:%s/", dbInstanceAddress[selectAddressIndex], PORT)
 
-	if authToken, err := rdsHelper.generateToken(endpoint, "test-user"); err == nil {
+	if authToken, err := rdsClient.generateToken(endpoint, "test-user"); err == nil {
 		log.Println(authToken)
 	} else {
 		log.Fatal(err)
