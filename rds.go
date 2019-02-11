@@ -42,8 +42,13 @@ func (r *rdsClient) getData(tempPath string) ([]*rds.DBInstance, error) {
 
 		defer jsonFile.Close()
 
-		jsonFile.Write(jsonData)
-		jsonFile.Close()
+		if _, err := jsonFile.Write(jsonData); err != nil {
+			return nil, err
+		}
+
+		if err := jsonFile.Close(); err != nil {
+			return nil, err
+		}
 
 		return result.DBInstances, nil
 	}
