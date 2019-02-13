@@ -13,11 +13,8 @@
     * Optionally, you can pass in the `AWS_PROFILE` e.g. `AWS_PROFILE=personal boop`
     
 ## Demo
-1. Pick the region
-![region](./screenshots/1.png)
-2. Pick the RDS endpoint
-![endpoint](./screenshots/2.png)
-3. Pick the RDS User
-![rds_user](./screenshots/3.png)
+1. Pick the region  ![region](./screenshots/1.png)
+2. Pick the RDS endpoint  ![endpoint](./screenshots/2.png)
+3. Pick the RDS User  ![rds_user](./screenshots/3.png)
 4. The token will be generated, and will be copied to your clipboard
 
