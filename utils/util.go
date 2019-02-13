@@ -1,11 +1,11 @@
-package main
+package utils
 
 import (
 	"os"
 	"runtime"
 )
 
-func userHomeDir() string {
+func UserHomeDir() string {
 	if runtime.GOOS == "windows" {
 		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
 		if home == "" {

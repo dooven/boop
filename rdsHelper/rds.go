@@ -1,4 +1,4 @@
-package main
+package rdsHelper
 
 import (
 	"encoding/json"
@@ -15,7 +15,7 @@ type rdsClient struct {
 	*rds.RDS
 }
 
-func (r *rdsClient) getData(tempPath string) ([]*rds.DBInstance, error) {
+func (r *rdsClient) GetRDSInstances(tempPath string) ([]*rds.DBInstance, error) {
 	if _, err := os.Stat(tempPath); os.IsNotExist(err) {
 		input := &rds.DescribeDBInstancesInput{}
 		result, err := r.DescribeDBInstances(input)
@@ -69,7 +69,7 @@ func (r *rdsClient) getData(tempPath string) ([]*rds.DBInstance, error) {
 
 }
 
-func (r *rdsClient) generateToken(endpoint string, dbUser string) (string, error) {
+func (r *rdsClient) GenerateToken(endpoint string, dbUser string) (string, error) {
 	config := r.Client.Config
 
 	if authToken, err := rdsutils.BuildAuthToken(
@@ -83,6 +83,6 @@ func (r *rdsClient) generateToken(endpoint string, dbUser string) (string, error
 	}
 }
 
-func newRdsClient(svc *rds.RDS) *rdsClient {
+func NewRdsClient(svc *rds.RDS) *rdsClient {
 	return &rdsClient{svc}
 }

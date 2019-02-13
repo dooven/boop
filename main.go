@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/atotto/clipboard"
+	"github.com/dooven/boop/config"
 	"log"
 	"os"
 	"path"
@@ -10,27 +11,17 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rds"
+	"github.com/dooven/boop/rdsHelper"
 	"github.com/manifoldco/promptui"
 )
 
 var (
-	PORT = "3006"
-	regionTemplates *promptui.SelectTemplates
+	PORT             = "3006"
+	regionTemplates  *promptui.SelectTemplates
 	addressTemplates *promptui.SelectTemplates
 )
-
-type regionOption struct {
-	Name   string
-	Region string
-}
-
-type config struct {
-	regions []regionOption
-	users []string
-}
 
 func init() {
 	regionTemplates = &promptui.SelectTemplates{
@@ -50,10 +41,13 @@ func init() {
 
 func main() {
 
-	regionOptions := []regionOption{
-		{Name: "test-region", Region: endpoints.EuWest1RegionID},
+	storedConfigs, err := config.GetOrWriteDefaults()
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
+	regionOptions := storedConfigs.Regions
 
 	regionSearcher := func(input string, index int) bool {
 		region := regionOptions[index]
@@ -101,11 +95,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	rdsClient := newRdsClient(rds.New(sess))
+	rdsClient := rdsHelper.NewRdsClient(rds.New(sess))
 
 	var dbInstanceAddress []string
 
-	instances, err := rdsClient.getData(tempPath)
+	instances, err := rdsClient.GetRDSInstances(tempPath)
 
 	if err != nil {
 		log.Fatal(err)
@@ -139,7 +133,7 @@ func main() {
 
 	endpoint := fmt.Sprintf("%s:%s/", dbInstanceAddress[selectAddressIndex], PORT)
 
-	authToken, err := rdsClient.generateToken(endpoint, "test-user")
+	authToken, err := rdsClient.GenerateToken(endpoint, "test-user")
 
 	if err != nil {
 		log.Fatal(err)
