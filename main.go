@@ -132,6 +132,8 @@ func main() {
 
 	endpoint := fmt.Sprintf("%s:%s/", dbInstanceAddress[selectAddressIndex], PORT)
 
+	fmt.Printf("Endpoint: %s\n\n", endpoint)
+
 	userSearcher := func(input string, index int) bool {
 		user := storedConfigs.Users[index]
 		input = strings.Replace(strings.ToLower(input), " ", "", -1)
@@ -153,7 +155,10 @@ func main() {
 		log.Fatal(selectedUserErr)
 	}
 
-	authToken, err := rdsClient.GenerateToken(endpoint, storedConfigs.Users[selectedUserIndex])
+	dbUser := storedConfigs.Users[selectedUserIndex]
+	fmt.Printf("Endpoint: %s\n\n", dbUser)
+
+	authToken, err := rdsClient.GenerateToken(endpoint, dbUser)
 
 	if err != nil {
 		log.Fatal(err)
