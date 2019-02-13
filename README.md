@@ -12,6 +12,10 @@
 2. Run `boop` 
     * Optionally, you can pass in the `AWS_PROFILE` e.g. `AWS_PROFILE=personal boop`
     
+## Configuration
+Config files are found under `$HOME/.boop.json`. Where you can modify the region that appears in the region list, 
+and the users that will appear in the users list. 
+    
 ## Demo
 1. Pick the region  
 ![region](./screenshots/1.png)
