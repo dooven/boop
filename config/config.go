@@ -19,7 +19,7 @@ type Config struct {
 	Users   []string
 }
 
-var configFileName = "boop.json"
+var configFileName = ".boop.json"
 
 func GetOrWriteDefaults() (*Config, error) {
 	configPath := fmt.Sprintf("%s/%s", utils.UserHomeDir(), configFileName)

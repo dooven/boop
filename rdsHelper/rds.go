@@ -30,7 +30,7 @@ func (r *rdsClient) GetRDSInstances(tempPath string) ([]*rds.DBInstance, error) 
 			return nil, err
 		}
 
-		if err := os.Mkdir(path.Dir(tempPath), os.ModePerm); err != nil {
+		if err := os.MkdirAll(path.Dir(tempPath), os.ModePerm); err != nil {
 			return nil, err
 		}
 

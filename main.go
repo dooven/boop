@@ -18,9 +18,9 @@ import (
 )
 
 var (
-	PORT             = "3006"
-	regionTemplates  *promptui.SelectTemplates
-	addressTemplates *promptui.SelectTemplates
+	PORT            = "3006"
+	regionTemplates *promptui.SelectTemplates
+	genericTemplate *promptui.SelectTemplates
 )
 
 func init() {
@@ -31,7 +31,7 @@ func init() {
 		Selected: "* {{ .Name | red | cyan }}",
 	}
 
-	addressTemplates = &promptui.SelectTemplates{
+	genericTemplate = &promptui.SelectTemplates{
 		Label:    "{{ . }}?",
 		Active:   "- {{ . | cyan }}",
 		Inactive: "  {{ . | cyan }}",
@@ -52,7 +52,6 @@ func main() {
 	regionSearcher := func(input string, index int) bool {
 		region := regionOptions[index]
 		name := region.Name
-		input = strings.Replace(strings.ToLower(input), " ", "", -1)
 
 		return strings.Contains(name, input)
 	}
@@ -120,7 +119,7 @@ func main() {
 	addressPrompt := promptui.Select{
 		Label:     "Endpoint",
 		Items:     dbInstanceAddress,
-		Templates: addressTemplates,
+		Templates: genericTemplate,
 		Size:      10,
 		Searcher:  addressSearcher,
 	}
@@ -133,7 +132,28 @@ func main() {
 
 	endpoint := fmt.Sprintf("%s:%s/", dbInstanceAddress[selectAddressIndex], PORT)
 
-	authToken, err := rdsClient.GenerateToken(endpoint, "test-user")
+	userSearcher := func(input string, index int) bool {
+		user := storedConfigs.Users[index]
+		input = strings.Replace(strings.ToLower(input), " ", "", -1)
+
+		return strings.Contains(user, input)
+	}
+
+	userPrompt := promptui.Select{
+		Label:     "User",
+		Items:     storedConfigs.Users,
+		Templates: genericTemplate,
+		Size:      10,
+		Searcher:  userSearcher,
+	}
+
+	selectedUserIndex, _, selectedUserErr := userPrompt.Run()
+
+	if selectedUserErr != nil {
+		log.Fatal(selectedUserErr)
+	}
+
+	authToken, err := rdsClient.GenerateToken(endpoint, storedConfigs.Users[selectedUserIndex])
 
 	if err != nil {
 		log.Fatal(err)
