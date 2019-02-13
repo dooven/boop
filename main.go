@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/atotto/clipboard"
+	"github.com/dooven/boop/config"
 	"log"
 	"os"
 	"path"
@@ -10,22 +11,17 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rds"
+	"github.com/dooven/boop/rdsHelper"
 	"github.com/manifoldco/promptui"
 )
 
 var (
-	PORT = "3006"
+	PORT            = "3006"
 	regionTemplates *promptui.SelectTemplates
-	addressTemplates *promptui.SelectTemplates
+	genericTemplate *promptui.SelectTemplates
 )
-
-type regionOption struct {
-	Name   string
-	Region string
-}
 
 func init() {
 	regionTemplates = &promptui.SelectTemplates{
@@ -35,7 +31,7 @@ func init() {
 		Selected: "* {{ .Name | red | cyan }}",
 	}
 
-	addressTemplates = &promptui.SelectTemplates{
+	genericTemplate = &promptui.SelectTemplates{
 		Label:    "{{ . }}?",
 		Active:   "- {{ . | cyan }}",
 		Inactive: "  {{ . | cyan }}",
@@ -45,15 +41,17 @@ func init() {
 
 func main() {
 
-	regionOptions := []regionOption{
-		{Name: "test-region", Region: endpoints.EuWest1RegionID},
+	storedConfigs, err := config.GetOrWriteDefaults()
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
+	regionOptions := storedConfigs.Regions
 
 	regionSearcher := func(input string, index int) bool {
 		region := regionOptions[index]
 		name := region.Name
-		input = strings.Replace(strings.ToLower(input), " ", "", -1)
 
 		return strings.Contains(name, input)
 	}
@@ -96,11 +94,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	rdsClient := newRdsClient(rds.New(sess))
+	rdsClient := rdsHelper.NewRdsClient(rds.New(sess))
 
 	var dbInstanceAddress []string
 
-	instances, err := rdsClient.getData(tempPath)
+	instances, err := rdsClient.GetRDSInstances(tempPath)
 
 	if err != nil {
 		log.Fatal(err)
@@ -121,7 +119,7 @@ func main() {
 	addressPrompt := promptui.Select{
 		Label:     "Endpoint",
 		Items:     dbInstanceAddress,
-		Templates: addressTemplates,
+		Templates: genericTemplate,
 		Size:      10,
 		Searcher:  addressSearcher,
 	}
@@ -134,7 +132,33 @@ func main() {
 
 	endpoint := fmt.Sprintf("%s:%s/", dbInstanceAddress[selectAddressIndex], PORT)
 
-	authToken, err := rdsClient.generateToken(endpoint, "test-user")
+	fmt.Printf("Endpoint: %s\n\n", endpoint)
+
+	userSearcher := func(input string, index int) bool {
+		user := storedConfigs.Users[index]
+		input = strings.Replace(strings.ToLower(input), " ", "", -1)
+
+		return strings.Contains(user, input)
+	}
+
+	userPrompt := promptui.Select{
+		Label:     "User",
+		Items:     storedConfigs.Users,
+		Templates: genericTemplate,
+		Size:      10,
+		Searcher:  userSearcher,
+	}
+
+	selectedUserIndex, _, selectedUserErr := userPrompt.Run()
+
+	if selectedUserErr != nil {
+		log.Fatal(selectedUserErr)
+	}
+
+	dbUser := storedConfigs.Users[selectedUserIndex]
+	fmt.Printf("Endpoint: %s\n\n", dbUser)
+
+	authToken, err := rdsClient.GenerateToken(endpoint, dbUser)
 
 	if err != nil {
 		log.Fatal(err)
